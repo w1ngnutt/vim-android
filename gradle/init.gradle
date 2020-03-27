@@ -4,26 +4,34 @@
 
 allprojects { project ->
 
-  task vim {
-    task -> doLast {
-      System.err.println ""
-      System.err.println "gradle-version " + gradleVersion
-      System.err.println "vim-project " + project.name
+    task vim(type: Jar) {
+      outputs.upToDateWhen { false }
 
-      if(project.hasProperty('android')) {
+      doLast {
+        System.err.println ""
+        System.err.println "gradle-version " + gradleVersion
+        System.err.println "vim-project " + project.name
 
-        if(project.android.defaultConfig.targetSdkVersion != null) {
-          def level = project.android.defaultConfig.targetSdkVersion.getApiLevel()
-          System.err.println "vim-target android-" + level
-        }
+        if(project.hasProperty('android')) {
 
-        if(project.android.hasProperty('applicationVariants')) {
-          project.android.applicationVariants.all { variant ->
-            variant.getCompileClasspath().each {
-              System.err.println "vim-gradle " + it
+          def cp2 = [android.getBootClasspath()[0], it.archivePath]
+          if(project.android.hasProperty('applicationVariants')) {
+            android.applicationVariants.all { v ->
+              cp2 += v.getCompileClasspath(null)
+            }
+          } else if(project.android.hasProperty('libraryVariants')) {
+            android.libraryVariants.all { v ->
+              cp2 += v.getCompileClasspath(null)
             }
           }
-        }
+          def classpath = cp2.unique()
+          classpath.each {
+            println "vim-gradle " + it
+          }
+
+          println "vim-builddir " + project.buildDir + '/intermediates/classes/debug'
+          println "vim-builddir " + project.buildDir + '/intermediates/classes/debug'
+
       } else {
         // Print build class directories. These assume the project follows a
         // standard gradle project with a main and test source sets. Custom

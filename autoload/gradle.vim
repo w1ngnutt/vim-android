@@ -164,6 +164,10 @@ endfunction
 " Tries to determine the location of the build.gradle file starting from the
 " current buffer location.
 function! gradle#findGradleFile()
+  
+  if(exists('g:gradle_build_file')) 
+    return g:gradle_build_file
+  endif
 
   let l:file = ''
   let l:path = expand('%:p:h')
@@ -527,6 +531,7 @@ function! gradle#setupGradleCommands()
   if executable(gradle#bin())
     command! -nargs=+ Gradle call gradle#compile(<f-args>)
     command! GradleSync call gradle#sync()
+    command! GradleFile echomsg gradle#findGradleFile()
   else
     command! -nargs=? Gradle echoerr 'Gradle binary could not be found, vim-android gradle commands are disabled'
     command! GradleSync echoerr 'Gradle binary could not be found, vim-android gradle commands are disabled'
